@@ -5,6 +5,12 @@ import { MindMapNode } from "./components/mind-map-node";
 import { Sidebar } from "./components/sidebar";
 import { Header } from "./components/header";
 
+/**
+ * This example demonstrates how you can remove the attribution from the React Flow renderer.
+ * Please only hide the attribution if you are subscribed to React Flow Pro: https://reactflow.dev/pro
+ */
+const proOptions = { hideAttribution: true };
+
 // カスタムノードタイプを定義
 const nodeTypes = {
   mindMapNode: MindMapNode,
@@ -31,6 +37,7 @@ function App() {
             edges={undefined}
             nodeTypes={nodeTypes}
             fitView
+            proOptions={proOptions}
             minZoom={0.5}
             maxZoom={2}
             nodesDraggable={true}
