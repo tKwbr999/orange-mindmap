@@ -133,3 +133,28 @@ export const deleteNodeAtom = atom(null, (get, set, nodeId: string) => {
     )
   );
 });
+
+// テキストブロックを追加するアトム
+export const addTextBlockAtom = atom(null, (get, set, text: string) => {
+  const nodes = get(nodesAtom);
+  const newNodeId = `node_${nodes.length + 1}`;
+
+  // 既存のノードと重ならない位置を見つける
+  const newNode = {
+    id: newNodeId,
+    type: "mindMapNode",
+    data: { label: text },
+    position: {
+      x: Math.random() * 300 + 100,
+      y: Math.random() * 300 + 100,
+    },
+  };
+
+  set(nodesAtom, [...nodes, newNode]);
+});
+
+// マインドマップをリセットするアトム
+export const resetMindMapAtom = atom(null, (_, set) => {
+  set(nodesAtom, initialNodes);
+  set(edgesAtom, initialEdges);
+});
