@@ -41,18 +41,19 @@ export const edgesAtom = atomWithStorage<Edge[]>("mindmap-edges", initialEdges);
 export const selectedNodeAtom = atom<Node | null>(null);
 
 
+
 // ノードを更新するアトム
 export const nodesChangeAtom = atom(null, (get, set, changes: NodeChange[]) => {
     set(nodesAtom, applyNodeChanges(changes, get(nodesAtom)));
-  });
+});
   
   // エッジを更新するアトム
-  export const edgesChangeAtom = atom(null, (get, set, changes: EdgeChange[]) => {
+export const edgesChangeAtom = atom(null, (get, set, changes: EdgeChange[]) => {
     set(edgesAtom, applyEdgeChanges(changes, get(edgesAtom)));
-  });
+});
   
   // ノード接続のアトム
-  export const connectAtom = atom(null, (_, set, connection: Connection) => {
+export const connectAtom = atom(null, (_, set, connection: Connection) => {
     set(edgesAtom, (eds) =>
       addEdge(
         {
@@ -63,4 +64,75 @@ export const nodesChangeAtom = atom(null, (get, set, changes: NodeChange[]) => {
         eds
       )
     );
-  });
+});
+
+// 子ノードを追加するアトム
+export const addChildNodeAtom = atom(null, (get, set, parentNode: Node) => {
+  const nodes = get(nodesAtom);
+  const newNodeId = `node_${nodes.length + 1}`;
+  const parentPosition = parentNode.position;
+
+  // 新しいノードを親の右下に配置
+  const newNode = {
+    id: newNodeId,
+    type: "mindMapNode",
+    data: { label: "New Idea" },
+    position: {
+      x: parentPosition.x + 100,
+      y: parentPosition.y + 100,
+    },
+  };
+
+  set(nodesAtom, [...nodes, newNode]);
+
+  // 親から新しいノードへのエッジを作成
+  const newEdge = {
+    id: `edge_${parentNode.id}_${newNodeId}`,
+    source: parentNode.id,
+    target: newNodeId,
+    animated: true,
+    style: { stroke: "#f6b93b", strokeWidth: 3 },
+  };
+
+  set(edgesAtom, [...get(edgesAtom), newEdge]);
+});
+
+// ノードラベルを更新するアトム
+export const updateNodeLabelAtom = atom(
+  null,
+  (get, set, { nodeId, newLabel }: { nodeId: string; newLabel: string }) => {
+    set(
+      nodesAtom,
+      get(nodesAtom).map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              label: newLabel,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }
+);
+
+// ノードを削除するアトム
+export const deleteNodeAtom = atom(null, (get, set, nodeId: string) => {
+  // ルートノードの削除を許可しない
+  if (nodeId === "root") return;
+
+  set(
+    nodesAtom,
+    get(nodesAtom).filter((node) => node.id !== nodeId)
+  );
+  set(
+    edgesAtom,
+    get(edgesAtom).filter(
+      (edge) => edge.source !== nodeId && edge.target !== nodeId
+    )
+  );
+});
+
